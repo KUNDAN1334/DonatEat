@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 
 import Login from "./pages/Login";
+import Logout from './pages/Logout';
 import Register from "./pages/Register";
 import DonorDashboard from "./pages/donor/DonorDashboard";
 import CreateDonation from "./pages/donor/CreateDonation";
@@ -24,6 +25,7 @@ function App() {
           <Route path="/" element={<Navigate to="/login" />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/logout" element={<Logout />} />
 
           {/* Donor */}
           <Route path="/donor/dashboard" element={<DonorDashboard />} />
