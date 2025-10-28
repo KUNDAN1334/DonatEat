@@ -23,7 +23,14 @@ function CreateDonation() {
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => setFormData(d => ({ ...d, location: { ...d.location, latitude: pos.coords.latitude, longitude: pos.coords.longitude } })),
+        (pos) => setFormData(d => ({
+          ...d,
+          location: {
+            ...d.location,
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude
+          }
+        })),
         (err) => console.error('Location error:', err)
       );
     }
@@ -42,12 +49,16 @@ function CreateDonation() {
     if (!selectedImage) return;
     setAnalyzing(true);
     try {
-      const formData = new FormData();
-      formData.append('image', selectedImage);
-      const res = await api.post('/donations/analyze-food', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      const formDataObj = new FormData();
+      formDataObj.append('image', selectedImage);
+      const res = await api.post('/donations/analyze-food', formDataObj, { headers: { 'Content-Type': 'multipart/form-data' } });
       setFoodAnalysis(res.data.analysis);
     } catch (error) {
-      alert('Failed to analyze image: ' + error.message);
+      if (error.response?.status === 429) {
+        alert('Your free quota for Gemini AI analysis is reached for this month. Please try again later.');
+      } else {
+        alert('Failed to analyze image: ' + error.message);
+      }
     } finally {
       setAnalyzing(false);
     }
@@ -71,7 +82,13 @@ function CreateDonation() {
       setSelectedImage(null);
       setImagePreview(null);
       setFoodAnalysis(null);
-      setFormData({ preparationTime: '', expiryTime: '', quantity: '', location: formData.location, additionalNotes: '' });
+      setFormData({
+        preparationTime: '',
+        expiryTime: '',
+        quantity: '',
+        location: formData.location,
+        additionalNotes: ''
+      });
     } catch (error) {
       alert('Failed to create donation: ' + error.message);
     } finally {
@@ -93,7 +110,11 @@ function CreateDonation() {
           {imagePreview && (
             <>
               <CardMedia component="img" height="300" image={imagePreview} alt="Food preview" sx={{ objectFit: 'contain', mb: 2 }} />
-              <Button variant="contained" onClick={handleAnalyzeImage} disabled={analyzing || foodAnalysis} fullWidth>
+              <Button
+                variant="contained"
+                onClick={handleAnalyzeImage}
+                disabled={analyzing || foodAnalysis}
+                fullWidth>
                 {analyzing ? <CircularProgress size={24} /> : 'Analyze Food with AI'}
               </Button>
             </>
@@ -106,12 +127,24 @@ function CreateDonation() {
           <CardContent>
             <Typography variant="h6" gutterBottom>AI Analysis Results</Typography>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}><Typography><strong>Food Name:</strong> {foodAnalysis.foodName}</Typography></Grid>
-              <Grid item xs={12} sm={6}><Chip label={foodAnalysis.foodType} color={foodAnalysis.foodType === 'veg' ? 'success' : 'error'} /></Grid>
-              <Grid item xs={12} sm={6}><Typography><strong>Category:</strong> {foodAnalysis.category}</Typography></Grid>
-              <Grid item xs={12} sm={6}><Typography><strong>Servings:</strong> {foodAnalysis.estimatedServings} people</Typography></Grid>
-              <Grid item xs={12}><Typography><strong>Storage:</strong> {foodAnalysis.storageRecommendation}</Typography></Grid>
-              <Grid item xs={12}><Typography><strong>Shelf Life:</strong> {foodAnalysis.shelfLife}</Typography></Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography><strong>Food Name:</strong> {foodAnalysis.foodName}</Typography>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Chip label={foodAnalysis.foodType} color={foodAnalysis.foodType === 'veg' ? 'success' : 'error'} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography><strong>Category:</strong> {foodAnalysis.category}</Typography>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography><strong>Servings:</strong> {foodAnalysis.estimatedServings} people</Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography><strong>Storage:</strong> {foodAnalysis.storageRecommendation}</Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography><strong>Shelf Life:</strong> {foodAnalysis.shelfLife}</Typography>
+              </Grid>
             </Grid>
           </CardContent>
         </Card>
@@ -122,11 +155,57 @@ function CreateDonation() {
           <CardContent>
             <Typography variant="h6" gutterBottom>Step 2: Additional Details</Typography>
             <Box component="form" onSubmit={handleSubmit}>
-              <TextField type="datetime-local" label="Preparation Time" InputLabelProps={{ shrink: true }} fullWidth margin="normal" required value={formData.preparationTime} onChange={e => setFormData(d => ({ ...d, preparationTime: e.target.value }))} />
-              <TextField type="datetime-local" label="Best Before (Expiry Time)" InputLabelProps={{ shrink: true }} fullWidth margin="normal" required value={formData.expiryTime} onChange={e => setFormData(d => ({ ...d, expiryTime: e.target.value }))} />
-              <TextField label="Pickup Address" multiline rows={2} fullWidth margin="normal" required value={formData.location.address} onChange={e => setFormData(d => ({ ...d, location: { ...d.location, address: e.target.value } }))} />
-              <TextField label="Additional Notes" multiline rows={3} fullWidth margin="normal" value={formData.additionalNotes} onChange={e => setFormData(d => ({ ...d, additionalNotes: e.target.value }))} />
-              <Button type="submit" variant="contained" fullWidth sx={{ mt: 3 }} disabled={submitting}>{submitting ? 'Posting...' : 'Post Donation'}</Button>
+              <TextField
+                type="datetime-local"
+                label="Preparation Time"
+                InputLabelProps={{ shrink: true }}
+                fullWidth
+                margin="normal"
+                required
+                value={formData.preparationTime}
+                onChange={e => setFormData(d => ({ ...d, preparationTime: e.target.value }))}
+              />
+              <TextField
+                type="datetime-local"
+                label="Best Before (Expiry Time)"
+                InputLabelProps={{ shrink: true }}
+                fullWidth
+                margin="normal"
+                required
+                value={formData.expiryTime}
+                onChange={e => setFormData(d => ({ ...d, expiryTime: e.target.value }))}
+              />
+              <TextField
+                label="Pickup Address"
+                multiline
+                rows={2}
+                fullWidth
+                margin="normal"
+                required
+                value={formData.location.address}
+                onChange={e => setFormData(d => ({
+                  ...d,
+                  location: { ...d.location, address: e.target.value }
+                }))}
+              />
+              <TextField
+                label="Additional Notes"
+                multiline
+                rows={3}
+                fullWidth
+                margin="normal"
+                value={formData.additionalNotes}
+                onChange={e => setFormData(d => ({ ...d, additionalNotes: e.target.value }))}
+              />
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                sx={{ mt: 3 }}
+                disabled={submitting}
+              >
+                {submitting ? 'Posting...' : 'Post Donation'}
+              </Button>
             </Box>
           </CardContent>
         </Card>

@@ -4,6 +4,7 @@ const multer = require('multer');
 const { db } = require('../config/firebase');
 const { analyzeFoodImage } = require('../services/geminiService');
 const { geohashForLocation } = require('geofire-common');
+const { geminiQuotaMiddleware } = require('../middlewares/geminiQuota');
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
