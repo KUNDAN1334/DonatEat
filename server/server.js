@@ -7,11 +7,13 @@ app.use(cors({
     origin: [
       'http://localhost:3000',
       'https://donat-eat.vercel.app',
-      'https://donat-eat-git-main-kundans-projects-0aacc48c.vercel.app',
-      'https://donat-kz8rlp4qe-kundans-projects-0aacc48c.vercel.app'
+      /https:\/\/donat-eat-.*\.vercel\.app$/
     ],
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
   }));
+  
   
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
