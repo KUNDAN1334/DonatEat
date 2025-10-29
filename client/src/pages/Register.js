@@ -17,7 +17,7 @@ function Register() {
       const userCredential = await createUserWithEmailAndPassword(auth, form.email, form.password);
       const token = await userCredential.user.getIdToken();
       localStorage.setItem('authToken', token);
-      await api.post('/auth/register', { uid: userCredential.user.uid, ...form });
+      await api.post('/api/auth/register', { uid: userCredential.user.uid, ...form });
       navigate(form.userType === 'donor' ? '/donor/dashboard' : '/ngo/dashboard');
     } catch (err) {
       setError(err.message || 'Registration failed');
