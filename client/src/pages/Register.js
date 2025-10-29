@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from './firebase';
-import api from './services/api';
+import { auth } from '../firebase';
+import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { Container, TextField, Button, Typography, Box, FormControl, InputLabel, Select, MenuItem, Alert, CircularProgress } from '@mui/material';
 
