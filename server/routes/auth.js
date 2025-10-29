@@ -7,22 +7,22 @@ router.post('/register', async (req, res) => {
   try {
     const { email, password, userType, name, phone, uid } = req.body;
     
-    // Log incoming request for debugging
+   
     console.log('Registration request:', { email, name, userType, uid });
     
-    // Validate required fields
+   
     if (!uid || !email || !name || !userType) {
       console.error('Missing required fields');
       return res.status(400).json({ error: 'Missing required fields: uid, email, name, userType' });
     }
 
-    // User is already created in firebase-auth by frontend, just save additional info in Firestore
+    
     const userDoc = {
       uid,
       email,
       name,
       phone: phone || '',
-      userType, // 'donor' or 'ngo'
+      userType, 
       createdAt: new Date().toISOString(),
       status: 'active'
     };
