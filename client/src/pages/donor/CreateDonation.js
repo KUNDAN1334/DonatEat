@@ -51,7 +51,7 @@ function CreateDonation() {
     try {
       const formDataObj = new FormData();
       formDataObj.append('image', selectedImage);
-      const res = await api.post('/donations/analyze-food', formDataObj, { headers: { 'Content-Type': 'multipart/form-data' } });
+      const res = await api.post('/api/donations/analyze-food', formDataObj, { headers: { 'Content-Type': 'multipart/form-data' } });
       setFoodAnalysis(res.data.analysis);
     } catch (error) {
       if (error.response?.status === 429) {
@@ -84,7 +84,7 @@ function CreateDonation() {
       const imageUrl = await imageRef.getDownloadURL();
 
       // Submit donation with imageUrl from firebase storage
-      await api.post('/donations/create', {
+      await api.post('/api/donations/create', {
         donorId: auth.currentUser.uid,
         foodAnalysis,
         ...formData,
