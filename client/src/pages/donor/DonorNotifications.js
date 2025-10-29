@@ -20,7 +20,7 @@ function DonorNotifications() {
 
   const fetchNotifications = async () => {
     try {
-      const res = await api.get(`/notifications/${auth.currentUser.uid}`);
+      const res = await api.get(`/api/notifications/${auth.currentUser.uid}`);
       setNotifications(res.data.notifications);
     } catch (error) {
       console.error(error);
@@ -30,7 +30,7 @@ function DonorNotifications() {
   const handleDeliveryDecision = async (approved) => {
     setLoading(true);
     try {
-      await api.put(`/donations/${selectedNotification.donationId}/delivery-approval`, {
+      await api.put(`/api/donations/${selectedNotification.donationId}/delivery-approval`, {
         approved,
         donorId: auth.currentUser.uid
       });

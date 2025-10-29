@@ -25,7 +25,7 @@ function DonorDashboard() {
 
   const fetchDonations = async () => {
     try {
-      const response = await api.get(`/donations/donor/${auth.currentUser.uid}`);
+      const response = await api.get(`/api/donations/donor/${auth.currentUser.uid}`);
       const donationsData = response.data.donations;
       setDonations(donationsData);
       setStats({
@@ -41,7 +41,7 @@ function DonorDashboard() {
 
   const fetchUnreadCount = async () => {
     try {
-      const response = await api.get(`/notifications/${auth.currentUser.uid}/unread-count`);
+      const response = await api.get(`/api/notifications/${auth.currentUser.uid}/unread-count`);
       setUnreadCount(response.data.count);
     } catch (error) {
       console.error(error);

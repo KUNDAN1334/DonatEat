@@ -18,7 +18,7 @@ function Login() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const token = await userCredential.user.getIdToken();
       localStorage.setItem('authToken', token);
-      const response = await api.get(`/auth/profile/${userCredential.user.uid}`);
+      const response = await api.get(`/api/auth/profile/${userCredential.user.uid}`);
       const userType = response.data.userType;
       navigate(userType === 'donor' ? '/donor/dashboard' : '/ngo/dashboard');
     } catch (err) {
