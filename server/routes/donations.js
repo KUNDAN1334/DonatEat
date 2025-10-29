@@ -10,7 +10,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 
 // Analyze food image with Gemini
-router.post('/analyze-food', upload.single('image'), async (req, res) => {
+router.post('/analyze-food',geminiQuotaMiddleware, upload.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No image provided' });
     const imageBase64 = req.file.buffer.toString('base64');
@@ -22,27 +22,32 @@ router.post('/analyze-food', upload.single('image'), async (req, res) => {
 });
 
 // Create donation
-router.post('/create', async (req, res) => {
+router.post('/create', upload.single('image'), async (req, res) => {
   try {
-    const {
-      donorId, foodAnalysis, preparationTime, expiryTime,
-      quantity, location, imageUrl, additionalNotes
-    } = req.body;
-    const geohash = geohashForLocation([location.latitude, location.longitude]);
+    if (!req.file) return res.status(400).json({ error: 'No image file provided' });
+
+    // Upload image to Firebase Storage
+    const file = bucket.file(`food_donations/${Date.now()}_${req.file.originalname}`);
+    await file.save(req.file.buffer, { contentType: req.file.mimetype });
+    await file.makePublic();
+    const imageUrl = file.publicUrl();
+
+    // Include imageUrl with donation data
     const donation = {
-      donorId,
-      foodDetails: foodAnalysis,
-      preparationTime,
-      expiryTime,
-      quantity,
-      location: { ...location, geohash },
+      donorId: req.body.donorId,
+      foodDetails: req.body.foodAnalysis,
+      preparationTime: req.body.preparationTime,
+      expiryTime: req.body.expiryTime,
+      quantity: req.body.quantity,
+      location: req.body.location,
       imageUrl,
-      additionalNotes,
-      status: 'available', // available, matched, in_transit, delivered, cancelled
+      additionalNotes: req.body.additionalNotes,
+      status: 'available',
       createdAt: new Date().toISOString(),
       matchedNGO: null,
       deliveryDetails: null
     };
+
     const docRef = await db.collection('donations').add(donation);
     res.status(201).json({ success: true, donationId: docRef.id, donation });
   } catch (error) {

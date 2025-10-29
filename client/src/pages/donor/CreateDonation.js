@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { auth } from '../../firebase';
+import { auth, storage } from '../../firebase'; // Make sure you export storage from your firebase config
 import api from '../../services/api';
 import {
   Container, Box, Typography, Button, TextField, Card, CardContent, CardMedia, CircularProgress, Grid, Chip
@@ -70,14 +70,27 @@ function CreateDonation() {
       alert('Please analyze the food image first');
       return;
     }
+    if (!selectedImage) {
+      alert('Please select an image.');
+      return;
+    }
+
     setSubmitting(true);
     try {
+      // Upload image to Firebase Storage before submitting form
+      const storageRef = storage.ref();
+      const imageRef = storageRef.child(`food_donations/${Date.now()}_${selectedImage.name}`);
+      await imageRef.put(selectedImage);
+      const imageUrl = await imageRef.getDownloadURL();
+
+      // Submit donation with imageUrl from firebase storage
       await api.post('/donations/create', {
         donorId: auth.currentUser.uid,
         foodAnalysis,
         ...formData,
-        imageUrl: imagePreview
+        imageUrl
       });
+
       alert('Donation posted successfully!');
       setSelectedImage(null);
       setImagePreview(null);
@@ -114,7 +127,8 @@ function CreateDonation() {
                 variant="contained"
                 onClick={handleAnalyzeImage}
                 disabled={analyzing || foodAnalysis}
-                fullWidth>
+                fullWidth
+              >
                 {analyzing ? <CircularProgress size={24} /> : 'Analyze Food with AI'}
               </Button>
             </>
