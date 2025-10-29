@@ -3,7 +3,16 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: [
+      'http://localhost:3000',
+      'https://donat-eat.vercel.app',
+      'https://donat-eat-git-main-kundans-projects-0aacc48c.vercel.app',
+      'https://donat-kz8rlp4qe-kundans-projects-0aacc48c.vercel.app'
+    ],
+    credentials: true
+  }));
+  
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
