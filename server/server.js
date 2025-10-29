@@ -3,8 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
-
-app.use(cors({
+// CORS Configuration - MUST be before routes
+const corsOptions = {
   origin: [
     'http://localhost:3000',
     'https://donat-eat.vercel.app',
@@ -13,16 +13,15 @@ app.use(cors({
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
-}));
+};
 
-
-app.options('*', cors());
+app.use(cors(corsOptions));
 
 // Body parsing middleware
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-
+// Request logging middleware for debugging
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.path}`);
   next();
